@@ -11,6 +11,8 @@
  *   headers: { Authorization: `Bearer ${await getAuthToken()}` }
  */
 
+import { logger } from './logger';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Account = {
@@ -88,80 +90,90 @@ export type DashboardData = {
  * TODO: GET /api/dashboard
  */
 export async function getDashboard(): Promise<DashboardData> {
-  // TODO: replace with real API call:
-  // const res = await fetch(`${BASE_URL}/api/dashboard`, { headers: authHeaders() });
-  // return res.json();
+  logger.info('API', 'getDashboard called');
 
-  return {
-    netWorth: '$86,290.42',
-    registeredAccounts: [
-      {
-        id: 'acc-retirement-001',
-        type: 'Retirement',
-        number: 'SY-4920',
-        balance: '$1,000.00',
-        tag: 'Growth Mode',
-        tagColor: '#b0c4de',
-        gainPct: '+4.2%',
-        gainAmt: '+$40.50',
-        riskLevel: 'High',
-      },
-      {
-        id: 'acc-tfsa-001',
-        type: 'TFSA',
-        number: 'SY-8812',
-        balance: '$84,290.42',
-        tag: 'Stable',
-        tagColor: '#6750a4',
-        gainPct: '+12.4%',
-        gainAmt: '+$9,340.12',
-        riskLevel: 'Medium',
-      },
-    ],
-    nonRegisteredAccounts: [
-      {
-        id: 'acc-checking-001',
-        type: 'Primary Checking',
-        number: 'SY-2201',
-        balance: '$1,000.00',
-        balanceColor: '#6750a4',
-        tag: 'Liquid',
-        tagColor: '#6750a4',
-      },
-    ],
-    unusedSubscriptions: [
-      {
-        id: 'sub-crunchyroll',
-        name: 'Crunchyroll',
-        sub: '$9.99/mo potential savings',
-        action: 'Cancel',
-        icon: 'close',
-        accent: '#6750a4',
-        bg: '#fafafa',
-        border: '#e0e0e01A',
-      },
-      {
-        id: 'sub-gympass',
-        name: 'Gym Pass',
-        sub: '$45.00/mo potential savings',
-        action: 'Cancel',
-        icon: 'close',
-        accent: '#6750a4',
-        bg: '#fafafa',
-        border: '#e0e0e01A',
-      },
-      {
-        id: 'sub-autosavings',
-        name: 'Auto-Savings',
-        sub: 'Move $124.00 to high-yield',
-        action: 'Execute',
-        icon: 'trending-up',
-        accent: '#7d5260',
-        bg: '#7d52600D',
-        border: '#7d52601A',
-      },
-    ],
-  };
+  try {
+    // TODO: replace with real API call:
+    // const res = await fetch(`${BASE_URL}/api/dashboard`, { headers: authHeaders() });
+    // return res.json();
+
+    const data: DashboardData = {
+      netWorth: '$86,290.42',
+      registeredAccounts: [
+        {
+          id: 'acc-retirement-001',
+          type: 'Retirement',
+          number: 'SY-4920',
+          balance: '$1,000.00',
+          tag: 'Growth Mode',
+          tagColor: '#b0c4de',
+          gainPct: '+4.2%',
+          gainAmt: '+$40.50',
+          riskLevel: 'High',
+        },
+        {
+          id: 'acc-tfsa-001',
+          type: 'TFSA',
+          number: 'SY-8812',
+          balance: '$84,290.42',
+          tag: 'Stable',
+          tagColor: '#6750a4',
+          gainPct: '+12.4%',
+          gainAmt: '+$9,340.12',
+          riskLevel: 'Medium',
+        },
+      ],
+      nonRegisteredAccounts: [
+        {
+          id: 'acc-checking-001',
+          type: 'Primary Checking',
+          number: 'SY-2201',
+          balance: '$1,000.00',
+          balanceColor: '#6750a4',
+          tag: 'Liquid',
+          tagColor: '#6750a4',
+        },
+      ],
+      unusedSubscriptions: [
+        {
+          id: 'sub-crunchyroll',
+          name: 'Crunchyroll',
+          sub: '$9.99/mo potential savings',
+          action: 'Cancel',
+          icon: 'close',
+          accent: '#6750a4',
+          bg: '#fafafa',
+          border: '#e0e0e01A',
+        },
+        {
+          id: 'sub-gympass',
+          name: 'Gym Pass',
+          sub: '$45.00/mo potential savings',
+          action: 'Cancel',
+          icon: 'close',
+          accent: '#6750a4',
+          bg: '#fafafa',
+          border: '#e0e0e01A',
+        },
+        {
+          id: 'sub-autosavings',
+          name: 'Auto-Savings',
+          sub: 'Move $124.00 to high-yield',
+          action: 'Execute',
+          icon: 'trending-up',
+          accent: '#7d5260',
+          bg: '#7d52600D',
+          border: '#7d52601A',
+        },
+      ],
+    };
+
+    logger.debug('API', 'getDashboard resolved with mock data', { netWorth: data.netWorth });
+    return data;
+  } catch (error) {
+    logger.error('API', 'getDashboard failed', error);
+    throw error;
+  }
 }
 
 // ─── Account Detail ───────────────────────────────────────────────────────────
@@ -171,59 +183,72 @@ export async function getDashboard(): Promise<DashboardData> {
  * TODO: GET /api/accounts/:accountId
  */
 export async function getAccountDetail(accountId: string): Promise<AccountDetail | null> {
-  // TODO: replace with real API call:
-  // const res = await fetch(`${BASE_URL}/api/accounts/${accountId}`, { headers: authHeaders() });
-  // if (!res.ok) return null;
-  // return res.json();
+  logger.info('API', 'getAccountDetail called', { accountId });
 
-  // Mock: same data regardless of accountId for now
-  const dashboard = await getDashboard();
-  const account =
-    dashboard.registeredAccounts.find((a) => a.id === accountId) ?? null;
+  try {
+    // TODO: replace with real API call:
+    // const res = await fetch(`${BASE_URL}/api/accounts/${accountId}`, { headers: authHeaders() });
+    // if (!res.ok) return null;
+    // return res.json();
 
-  if (!account) return null;
+    // Mock: same data regardless of accountId for now
+    const dashboard = await getDashboard();
+    const account =
+      dashboard.registeredAccounts.find((a) => a.id === accountId) ?? null;
 
-  return {
-    account,
-    sectors: [
-      { name: 'Technology', pct: 42, color: '#6750a4' },
-      { name: 'Finance', pct: 28, color: '#b0c4de' },
-      { name: 'Healthcare', pct: 15, color: '#938f99' },
-      { name: 'Energy', pct: 10, color: '#cac4d0' },
-      { name: 'Consumer Discretionary', pct: 5, color: '#1c1b1f' },
-    ],
-    geoAllocations: [
-      { name: 'USA', pct: 60, color: '#6750a4' },
-      { name: 'Canada', pct: 25, color: '#b0c4de' },
-      { name: 'International', pct: 15, color: '#cac4d0' },
-    ],
-    recentActivity: [
-      {
-        id: 'act-001',
-        icon: 'add',
-        title: 'Dividend Reinvestment',
-        sub: 'Oct 12, 2023 · VFV.TO',
-        amount: '+$142.20',
-        positive: true,
-      },
-      {
-        id: 'act-002',
-        icon: 'shopping-bag',
-        title: 'Buy Order Executed',
-        sub: 'Oct 08, 2023 · AAPL (5 shares)',
-        amount: '-$890.45',
-        positive: false,
-      },
-      {
-        id: 'act-003',
-        icon: 'account-balance',
-        title: 'Contribution',
-        sub: 'Sep 28, 2023 · From Main Ledger',
-        amount: '+$1,500.00',
-        positive: true,
-      },
-    ],
-  };
+    if (!account) {
+      logger.warn('API', 'getAccountDetail: account not found', { accountId });
+      return null;
+    }
+
+    const detail: AccountDetail = {
+      account,
+      sectors: [
+        { name: 'Technology', pct: 42, color: '#6750a4' },
+        { name: 'Finance', pct: 28, color: '#b0c4de' },
+        { name: 'Healthcare', pct: 15, color: '#938f99' },
+        { name: 'Energy', pct: 10, color: '#cac4d0' },
+        { name: 'Consumer Discretionary', pct: 5, color: '#1c1b1f' },
+      ],
+      geoAllocations: [
+        { name: 'USA', pct: 60, color: '#6750a4' },
+        { name: 'Canada', pct: 25, color: '#b0c4de' },
+        { name: 'International', pct: 15, color: '#cac4d0' },
+      ],
+      recentActivity: [
+        {
+          id: 'act-001',
+          icon: 'add',
+          title: 'Dividend Reinvestment',
+          sub: 'Oct 12, 2023 · VFV.TO',
+          amount: '+$142.20',
+          positive: true,
+        },
+        {
+          id: 'act-002',
+          icon: 'shopping-bag',
+          title: 'Buy Order Executed',
+          sub: 'Oct 08, 2023 · AAPL (5 shares)',
+          amount: '-$890.45',
+          positive: false,
+        },
+        {
+          id: 'act-003',
+          icon: 'account-balance',
+          title: 'Contribution',
+          sub: 'Sep 28, 2023 · From Main Ledger',
+          amount: '+$1,500.00',
+          positive: true,
+        },
+      ],
+    };
+
+    logger.debug('API', 'getAccountDetail resolved with mock data', { accountId });
+    return detail;
+  } catch (error) {
+    logger.error('API', 'getAccountDetail failed', error);
+    throw error;
+  }
 }
 
 // ─── Subscriptions ────────────────────────────────────────────────────────────
@@ -233,13 +258,20 @@ export async function getAccountDetail(accountId: string): Promise<AccountDetail
  * TODO: DELETE /api/subscriptions/:subscriptionId
  */
 export async function cancelSubscription(subscriptionId: string): Promise<void> {
-  // TODO: replace with real API call:
-  // await fetch(`${BASE_URL}/api/subscriptions/${subscriptionId}`, {
-  //   method: 'DELETE',
-  //   headers: authHeaders(),
-  // });
+  logger.info('API', 'cancelSubscription called', { subscriptionId });
 
-  console.log(`[mock] cancelSubscription called for: ${subscriptionId}`);
+  try {
+    // TODO: replace with real API call:
+    // await fetch(`${BASE_URL}/api/subscriptions/${subscriptionId}`, {
+    //   method: 'DELETE',
+    //   headers: authHeaders(),
+    // });
+
+    logger.debug('API', '[mock] cancelSubscription completed', { subscriptionId });
+  } catch (error) {
+    logger.error('API', 'cancelSubscription failed', error);
+    throw error;
+  }
 }
 
 /**
@@ -247,11 +279,18 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
  * TODO: POST /api/actions/:actionId/execute
  */
 export async function executeAction(actionId: string): Promise<void> {
-  // TODO: replace with real API call:
-  // await fetch(`${BASE_URL}/api/actions/${actionId}/execute`, {
-  //   method: 'POST',
-  //   headers: authHeaders(),
-  // });
+  logger.info('API', 'executeAction called', { actionId });
 
-  console.log(`[mock] executeAction called for: ${actionId}`);
+  try {
+    // TODO: replace with real API call:
+    // await fetch(`${BASE_URL}/api/actions/${actionId}/execute`, {
+    //   method: 'POST',
+    //   headers: authHeaders(),
+    // });
+
+    logger.debug('API', '[mock] executeAction completed', { actionId });
+  } catch (error) {
+    logger.error('API', 'executeAction failed', error);
+    throw error;
+  }
 }
