@@ -9,8 +9,8 @@ import { colors } from '../theme/colors';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
 import TFSADetailScreen from '../screens/TFSADetailScreen';
-import RoastScreen from '../screens/RoastScreen';
 import SquadVaultsScreen from '../screens/SquadVaultsScreen';
+import RoastScreen from '../screens/RoastScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 // ─── Tab Navigator ────────────────────────────────────────────────────────────
@@ -61,6 +61,13 @@ function MainTabs() {
         component={TFSADetailScreen}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon icon="account-balance-wallet" label="Vaults" focused={focused} />,
+        }}
+      />
+      <Tab.Screen
+        name="Squad"
+        component={SquadVaultsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => <TabIcon icon="group" label="Squad" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -117,18 +124,18 @@ const styles = StyleSheet.create({
   activeTab: {
     backgroundColor: colors.primary,
     borderRadius: 999,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
   activeTabLabel: {
-    fontSize: 9, fontWeight: '700', color: '#fff',
-    letterSpacing: 1, textTransform: 'uppercase', marginTop: 2,
+    fontSize: 8, fontWeight: '700', color: '#fff',
+    letterSpacing: 0.8, textTransform: 'uppercase', marginTop: 2,
   },
-  inactiveTab: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
+  inactiveTab: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 },
   inactiveTabLabel: {
-    fontSize: 9, fontWeight: '700', color: colors.onSurface + '66',
-    letterSpacing: 1, textTransform: 'uppercase', marginTop: 2,
+    fontSize: 8, fontWeight: '700', color: colors.onSurface + '66',
+    letterSpacing: 0.8, textTransform: 'uppercase', marginTop: 2,
   },
 });
