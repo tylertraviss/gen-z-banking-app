@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,10 +8,23 @@ import { colors } from '../theme/colors';
 
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
-import TFSADetailScreen from '../screens/TFSADetailScreen';
+import AccountDetailScreen from '../screens/AccountDetailScreen';
 import SquadVaultsScreen from '../screens/SquadVaultsScreen';
 import RoastScreen from '../screens/RoastScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+
+// ─── Home Stack (nested inside Home tab so tab bar stays visible) ──────────────
+
+const HomeStack = createNativeStackNavigator();
+
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <HomeStack.Screen name="HomeMain" component={HomeScreen} />
+      <HomeStack.Screen name="AccountDetail" component={AccountDetailScreen} />
+    </HomeStack.Navigator>
+  );
+}
 
 // ─── Tab Navigator ────────────────────────────────────────────────────────────
 
@@ -51,16 +64,9 @@ function MainTabs() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStackNavigator}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon icon="home" label="Home" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="Vaults"
-        component={TFSADetailScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="account-balance-wallet" label="Vaults" focused={focused} />,
         }}
       />
       <Tab.Screen
@@ -107,19 +113,17 @@ export default function Navigation() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
-    backgroundColor: colors.surface + 'CC',
-    borderTopWidth: 0,
+    backgroundColor: colors.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.outlineVariant + '33',
     height: Platform.OS === 'ios' ? 88 : 72,
     paddingBottom: Platform.OS === 'ios' ? 24 : 8,
     paddingTop: 12,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
     shadowColor: '#5D3FD3',
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: -10 },
-    elevation: 10,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 16,
   },
   activeTab: {
     backgroundColor: colors.primary,

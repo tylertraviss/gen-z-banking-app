@@ -1,64 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
-
-const registeredAccounts = [
-  {
-    type: 'Retirement',
-    number: 'SY-4920',
-    balance: '$1,000.00',
-    tag: 'Growth Mode',
-    tagColor: colors.tertiaryContainer,
-  },
-  {
-    type: 'TFSA',
-    number: 'SY-8812',
-    balance: '$84,290.42',
-    tag: 'Stable',
-    tagColor: colors.secondary,
-  },
-];
-
-const subscriptions = [
-  {
-    name: 'Crunchyroll',
-    sub: '$9.99/mo potential savings',
-    action: 'Cancel',
-    icon: 'close' as const,
-    accent: colors.primary,
-    bg: colors.surfaceContainerLowest,
-    border: colors.outlineVariant + '1A',
-  },
-  {
-    name: 'Gym Pass',
-    sub: '$45.00/mo potential savings',
-    action: 'Cancel',
-    icon: 'close' as const,
-    accent: colors.primary,
-    bg: colors.surfaceContainerLowest,
-    border: colors.outlineVariant + '1A',
-  },
-  {
-    name: 'Auto-Savings',
-    sub: 'Move $124.00 to high-yield',
-    action: 'Execute',
-    icon: 'trending-up' as const,
-    accent: colors.tertiary,
-    bg: colors.tertiary + '0D',
-    border: colors.tertiary + '1A',
-  },
-];
+import {
+  getDashboard,
+  cancelSubscription,
+  executeAction,
+  type DashboardData,
+  type Account,
+  type Subscription,
+} from '../services/api';
 
 export default function HomeScreen() {
+  const navigation = useNavigation<any>();
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // TODO: re-fetch when the user returns to this screen (useFocusEffect)
+    getDashboard()
+      .then(setDashboard)
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || !dashboard) {
+    return (
+      <SafeAreaView style={styles.root} edges={['top']}>
+        <View style={styles.header}>
+          <View style={styles.headerLogo}>
+            <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
+            <Text style={styles.logoText}>SYNERGY</Text>
+          </View>
+        </View>
+        <View style={styles.loadingCenter}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const { netWorth, registeredAccounts, nonRegisteredAccounts, unusedSubscriptions } = dashboard;
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       {/* Header */}
@@ -67,19 +58,13 @@ export default function HomeScreen() {
           <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
           <Text style={styles.logoText}>SYNERGY</Text>
         </View>
-        <View style={styles.avatar}>
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAw9ad9KEosGiHg7hMcWj2MObYMQw97LaoThB577kAyffIPgN8zAoqlcS5dKMLMktoUTQ2NFijsWbibnGTLXbVUNL0v0r6Yz7WZDeyfd3Oef7uV8ezAG1nm7vAg5YfuECwdSOT7g0gdWYSuEeldZnzRBl6XHb0DnzLoo0Hvh3Ce6-cy5vOv8NVJxUp6GYIJavC4IZknd9EgGOhSvb83zwKJLhL2S3sfioVppK3E9v-92hSlwqrAy-1NSrUwXw9_gYyCmXCvSeQEMNE' }}
-            style={styles.avatarImg}
-          />
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Net Worth */}
         <View style={styles.netWorthSection}>
           <Text style={styles.netWorthLabel}>Current Net Worth</Text>
-          <Text style={styles.netWorthValue}>$86,290.42</Text>
+          <Text style={styles.netWorthValue}>{netWorth}</Text>
           <View style={styles.netWorthBar} />
         </View>
 
@@ -90,8 +75,22 @@ export default function HomeScreen() {
             <MaterialIcons name="shield" size={22} color={colors.primary} />
           </View>
           <View style={styles.accountGrid}>
-            {registeredAccounts.map((acct) => (
-              <TouchableOpacity key={acct.number} style={styles.accountCard} activeOpacity={0.8}>
+            {registeredAccounts.map((acct: Account) => (
+              <TouchableOpacity
+                key={acct.id}
+                style={styles.accountCard}
+                activeOpacity={0.8}
+                onPress={() => navigation.navigate('AccountDetail', {
+                  type: acct.type,
+                  number: acct.number,
+                  balance: acct.balance,
+                  tag: acct.tag,
+                  tagColor: acct.tagColor,
+                  gainPct: acct.gainPct,
+                  gainAmt: acct.gainAmt,
+                  riskLevel: acct.riskLevel,
+                })}
+              >
                 <View>
                   <Text style={styles.accountType}>{acct.type}</Text>
                   <Text style={styles.accountNumber}>{acct.number}</Text>
@@ -102,6 +101,7 @@ export default function HomeScreen() {
                 </View>
               </TouchableOpacity>
             ))}
+            <LinkAccountButton />
           </View>
         </View>
 
@@ -112,23 +112,21 @@ export default function HomeScreen() {
             <MaterialIcons name="account-balance" size={22} color={colors.primary} />
           </View>
           <View style={styles.accountGrid}>
-            {/* Primary Checking */}
-            <TouchableOpacity style={styles.accountCard} activeOpacity={0.8}>
-              <View>
-                <Text style={styles.accountType}>Primary Checking</Text>
-                <Text style={styles.accountNumber}>SY-2201</Text>
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={[styles.accountBalance, { color: colors.primary }]}>$1,000.00</Text>
-                <Text style={[styles.accountTag, { color: colors.secondary }]}>Liquid</Text>
-              </View>
-            </TouchableOpacity>
-
-            {/* Link Account */}
-            <TouchableOpacity style={styles.linkAccountBtn} activeOpacity={0.8}>
-              <MaterialIcons name="add" size={16} color={colors.secondary} />
-              <Text style={styles.linkAccountText}>Link Account</Text>
-            </TouchableOpacity>
+            {nonRegisteredAccounts.map((acct) => (
+              <TouchableOpacity key={acct.id} style={styles.accountCard} activeOpacity={0.8}>
+                <View>
+                  <Text style={styles.accountType}>{acct.type}</Text>
+                  <Text style={styles.accountNumber}>{acct.number}</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={[styles.accountBalance, acct.balanceColor ? { color: acct.balanceColor } : {}]}>
+                    {acct.balance}
+                  </Text>
+                  <Text style={[styles.accountTag, { color: acct.tagColor }]}>{acct.tag}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+            <LinkAccountButton />
           </View>
         </View>
 
@@ -144,18 +142,26 @@ export default function HomeScreen() {
             </View>
           </View>
           <View style={styles.subList}>
-            {subscriptions.map((s) => (
+            {unusedSubscriptions.map((s: Subscription) => (
               <View
-                key={s.name}
+                key={s.id}
                 style={[styles.subRow, { backgroundColor: s.bg, borderColor: s.border }]}
               >
                 <View>
-                  <Text style={[styles.subName, s.name === 'Auto-Savings' && { color: colors.tertiary }]}>
+                  <Text style={[styles.subName, s.action === 'Execute' && { color: colors.tertiary }]}>
                     {s.name}
                   </Text>
                   <Text style={styles.subDesc}>{s.sub}</Text>
                 </View>
-                <TouchableOpacity style={styles.subAction} activeOpacity={0.8}>
+                <TouchableOpacity
+                  style={styles.subAction}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    s.action === 'Cancel'
+                      ? cancelSubscription(s.id)
+                      : executeAction(s.id)
+                  }
+                >
                   <Text style={[styles.subActionText, { color: s.accent }]}>{s.action}</Text>
                   <MaterialIcons name={s.icon} size={14} color={s.accent} />
                 </TouchableOpacity>
@@ -165,6 +171,23 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function LinkAccountButton() {
+  return (
+    <TouchableOpacity style={styles.linkAccountBtn} activeOpacity={0.75}>
+      <View style={styles.linkAccountInner}>
+        <View style={styles.linkAccountIconWrap}>
+          <MaterialIcons name="add" size={18} color="#fff" />
+        </View>
+        <View>
+          <Text style={styles.linkAccountTitle}>Link Account</Text>
+          <Text style={styles.linkAccountSub}>Connect a bank or brokerage</Text>
+        </View>
+      </View>
+      <MaterialIcons name="chevron-right" size={20} color={colors.primary} />
+    </TouchableOpacity>
   );
 }
 
@@ -181,15 +204,10 @@ const styles = StyleSheet.create({
     fontSize: 18, fontWeight: '900', letterSpacing: 2,
     color: colors.primaryContainer,
   },
-  avatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden',
-  },
-  avatarImg: { width: '100%', height: '100%' },
 
+  loadingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingHorizontal: 20, paddingBottom: 110 },
 
-  // Net Worth
   netWorthSection: { alignItems: 'center', paddingVertical: 32 },
   netWorthLabel: {
     fontSize: 11, fontWeight: '600', letterSpacing: 3,
@@ -204,7 +222,6 @@ const styles = StyleSheet.create({
     borderRadius: 2, marginTop: 16,
   },
 
-  // Sections
   section: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 20, padding: 24, marginBottom: 16, gap: 16,
@@ -212,7 +229,6 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sectionTitle: { fontSize: 20, fontWeight: '700', color: colors.onSurface },
 
-  // Account cards
   accountGrid: { gap: 10 },
   accountCard: {
     backgroundColor: colors.surfaceContainerLowest,
@@ -228,16 +244,19 @@ const styles = StyleSheet.create({
   accountTag: { fontSize: 10, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
 
   linkAccountBtn: {
-    backgroundColor: 'transparent',
-    borderRadius: 12, borderWidth: 2, borderStyle: 'dashed',
-    borderColor: colors.outlineVariant,
-    paddingVertical: 24, paddingHorizontal: 16,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    minHeight: 72,
+    backgroundColor: colors.primary + '14',
+    borderRadius: 14, borderWidth: 1.5, borderColor: colors.primary + '33',
+    paddingVertical: 14, paddingHorizontal: 16,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
-  linkAccountText: { fontSize: 14, fontWeight: '500', color: colors.secondary },
+  linkAccountInner: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  linkAccountIconWrap: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center',
+  },
+  linkAccountTitle: { fontSize: 14, fontWeight: '700', color: colors.primary },
+  linkAccountSub: { fontSize: 11, color: colors.onSurfaceVariant, marginTop: 1 },
 
-  // Subscriptions
   subSection: {
     backgroundColor: 'transparent', paddingHorizontal: 0,
     borderTopWidth: StyleSheet.hairlineWidth,

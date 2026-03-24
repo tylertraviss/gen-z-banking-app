@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,33 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { colors } from '../theme/colors';
+import {
+  getAccountDetail,
+  type AccountDetail,
+  type SectorAllocation,
+  type GeoAllocation,
+  type ActivityItem,
+} from '../services/api';
+
+export type AccountDetailParams = {
+  AccountDetail: {
+    type: string;
+    number: string;
+    balance: string;
+    tag: string;
+    tagColor: string;
+    gainPct: string;
+    gainAmt: string;
+    riskLevel: string;
+  };
+};
 
 function SynergyHeader({ onBack }: { onBack: () => void }) {
   return (
@@ -37,81 +58,66 @@ const headerStyles = StyleSheet.create({
   },
 });
 
-const { width } = Dimensions.get('window');
-
 const timeRanges = ['1M', '6M', '1Y', 'ALL'];
 
-const sectors = [
-  { name: 'Technology', pct: 42, color: colors.primary },
-  { name: 'Finance', pct: 28, color: colors.primaryContainer },
-  { name: 'Healthcare', pct: 15, color: colors.outline },
-  { name: 'Energy', pct: 10, color: colors.outlineVariant },
-  { name: 'Consumer Discretionary', pct: 5, color: colors.surfaceDim },
-];
-
-const geoData = [
-  { name: 'USA', pct: 60, color: colors.primary },
-  { name: 'Canada', pct: 25, color: colors.primaryContainer },
-  { name: 'International', pct: 15, color: colors.outlineVariant },
-];
-
-const activity = [
-  {
-    icon: 'add' as const,
-    title: 'Dividend Reinvestment',
-    sub: 'Oct 12, 2023 · VFV.TO',
-    amount: '+$142.20',
-    positive: true,
-  },
-  {
-    icon: 'shopping-bag' as const,
-    title: 'Buy Order Executed',
-    sub: 'Oct 08, 2023 · AAPL (5 shares)',
-    amount: '-$890.45',
-    positive: false,
-  },
-  {
-    icon: 'account-balance' as const,
-    title: 'Contribution',
-    sub: 'Sep 28, 2023 · From Main Ledger',
-    amount: '+$1,500.00',
-    positive: true,
-  },
-];
-
-// Donut segment helpers
+// Donut helpers
 const DONUT_R = 15.915;
 const DONUT_CIRC = 2 * Math.PI * DONUT_R;
-
 function donutDashArray(pct: number) {
   return `${(pct / 100) * DONUT_CIRC} ${DONUT_CIRC}`;
 }
-
 function donutOffset(startPct: number) {
   return -((startPct / 100) * DONUT_CIRC);
 }
 
-export default function TFSADetailScreen() {
+export default function AccountDetailScreen() {
   const [activeRange, setActiveRange] = useState('1Y');
+  const [detail, setDetail] = useState<AccountDetail | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<AccountDetailParams, 'AccountDetail'>>();
+
+  const { type, number, balance, gainPct, gainAmt, riskLevel } = route.params;
+  const accountLabel = type.toUpperCase();
+
+  // TODO: pass a real account ID via route.params once the backend is wired up.
+  // For now we derive a mock ID from the account number.
+  const accountId = `acc-${type.toLowerCase().replace(/\s+/g, '-')}-001`;
+
+  useEffect(() => {
+    getAccountDetail(accountId)
+      .then(setDetail)
+      .finally(() => setLoading(false));
+  }, [accountId]);
+
+  const sectors: SectorAllocation[] = detail?.sectors ?? [];
+  const geoData: GeoAllocation[] = detail?.geoAllocations ?? [];
+  const activity: ActivityItem[] = detail?.recentActivity ?? [];
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       <SynergyHeader onBack={() => navigation.goBack()} />
+      {loading ? (
+        <View style={styles.loadingCenter}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : (
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
         {/* Hero */}
         <View style={styles.heroSection}>
           <View style={styles.heroLabel}>
             <MaterialIcons name="verified" size={14} color={colors.primary} />
-            <Text style={styles.heroLabelText}>TAX-FREE SAVINGS ACCOUNT</Text>
+            <Text style={styles.heroLabelText}>{accountLabel}</Text>
           </View>
-          <Text style={styles.balance}>$84,290.42</Text>
+          <Text style={styles.accountNumber}>{number}</Text>
+          <Text style={styles.balance}>{balance}</Text>
           <View style={styles.heroStats}>
             <View style={styles.gainBadge}>
               <MaterialIcons name="trending-up" size={12} color={colors.onTertiaryFixedVariant} />
-              <Text style={styles.gainBadgeText}>+12.4% THIS YEAR</Text>
+              <Text style={styles.gainBadgeText}>{gainPct} THIS YEAR</Text>
             </View>
-            <Text style={styles.gainSub}>+$9,340.12 total gains</Text>
+            <Text style={styles.gainSub}>{gainAmt} total gains</Text>
           </View>
         </View>
 
@@ -121,13 +127,11 @@ export default function TFSADetailScreen() {
           <Text style={styles.cardSub}>Portfolio Performance</Text>
 
           <View style={styles.chartContainer}>
-            {/* Y-axis */}
             <View style={styles.yAxis}>
               {['$90k', '$70k', '$50k', ''].map((l, i) => (
                 <Text key={i} style={styles.axisLabel}>{l}</Text>
               ))}
             </View>
-            {/* SVG Chart */}
             <View style={styles.svgWrap}>
               <Svg width="100%" height={200} viewBox="0 0 1000 300" preserveAspectRatio="none">
                 <Defs>
@@ -142,15 +146,11 @@ export default function TFSADetailScreen() {
                 />
                 <Path
                   d="M0,250 Q100,230 200,190 T400,150 T600,100 T800,130 T1000,40"
-                  fill="none"
-                  stroke="#451ebb"
-                  strokeWidth={3}
-                  strokeLinecap="round"
+                  fill="none" stroke="#451ebb" strokeWidth={3} strokeLinecap="round"
                 />
                 <Circle cx={1000} cy={40} r={4} fill="#451ebb" />
                 <Circle cx={1000} cy={40} r={10} fill="#451ebb" fillOpacity={0.2} />
               </Svg>
-              {/* X-axis */}
               <View style={styles.xAxis}>
                 {['1Y AGO', '6M AGO', 'CURRENT'].map((l) => (
                   <Text key={l} style={styles.axisLabel}>{l}</Text>
@@ -159,7 +159,6 @@ export default function TFSADetailScreen() {
             </View>
           </View>
 
-          {/* Time Range + Risk */}
           <View style={styles.chartFooter}>
             <View style={styles.rangePills}>
               {timeRanges.map((r) => (
@@ -177,7 +176,7 @@ export default function TFSADetailScreen() {
             <View style={styles.riskRow}>
               <MaterialIcons name="warning" size={18} color={colors.onSurfaceVariant} />
               <Text style={styles.riskText}>
-                Risk Level: <Text style={{ color: colors.onSurface, fontWeight: '700' }}>Medium</Text>
+                Risk: <Text style={{ color: colors.onSurface, fontWeight: '700' }}>{riskLevel}</Text>
               </Text>
             </View>
           </View>
@@ -209,39 +208,21 @@ export default function TFSADetailScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Geographic Allocation</Text>
           <View style={styles.geoRow}>
-            {/* Donut */}
             <View style={styles.donutWrap}>
               <Svg width={120} height={120} viewBox="0 0 36 36" style={{ transform: [{ rotate: '-90deg' }] }}>
-                {/* Background ring */}
                 <Circle cx={18} cy={18} r={DONUT_R} fill="transparent" stroke={colors.surfaceContainerLow} strokeWidth={3} />
-                {/* USA */}
-                <Circle
-                  cx={18} cy={18} r={DONUT_R} fill="transparent"
-                  stroke={colors.primary} strokeWidth={3}
-                  strokeDasharray={donutDashArray(60)}
-                  strokeDashoffset={donutOffset(0)}
-                />
-                {/* Canada */}
-                <Circle
-                  cx={18} cy={18} r={DONUT_R} fill="transparent"
-                  stroke={colors.primaryContainer} strokeWidth={3}
-                  strokeDasharray={donutDashArray(25)}
-                  strokeDashoffset={donutOffset(60)}
-                />
-                {/* International */}
-                <Circle
-                  cx={18} cy={18} r={DONUT_R} fill="transparent"
-                  stroke={colors.outlineVariant} strokeWidth={3}
-                  strokeDasharray={donutDashArray(15)}
-                  strokeDashoffset={donutOffset(85)}
-                />
+                <Circle cx={18} cy={18} r={DONUT_R} fill="transparent" stroke={colors.primary} strokeWidth={3}
+                  strokeDasharray={donutDashArray(60)} strokeDashoffset={donutOffset(0)} />
+                <Circle cx={18} cy={18} r={DONUT_R} fill="transparent" stroke={colors.primaryContainer} strokeWidth={3}
+                  strokeDasharray={donutDashArray(25)} strokeDashoffset={donutOffset(60)} />
+                <Circle cx={18} cy={18} r={DONUT_R} fill="transparent" stroke={colors.outlineVariant} strokeWidth={3}
+                  strokeDasharray={donutDashArray(15)} strokeDashoffset={donutOffset(85)} />
               </Svg>
               <View style={styles.donutCenter}>
                 <Text style={styles.donutCenterTextSm}>Global</Text>
                 <Text style={styles.donutCenterTextSm}>Mix</Text>
               </View>
             </View>
-            {/* Legend */}
             <View style={styles.geoLegend}>
               {geoData.map((g) => (
                 <View key={g.name} style={styles.geoLegendRow}>
@@ -282,24 +263,33 @@ export default function TFSADetailScreen() {
             </View>
           ))}
         </View>
+
       </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
+  loadingCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 100 },
 
-  // Hero
   heroSection: { marginBottom: 24, alignItems: 'center', paddingTop: 8 },
-  heroLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  heroLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
   heroLabelText: {
     fontSize: 11, fontWeight: '700', color: colors.onSurfaceVariant,
     letterSpacing: 1.5, textTransform: 'uppercase',
   },
-  balance: { fontSize: 52, fontWeight: '800', color: colors.onSurface, letterSpacing: -2, marginBottom: 16, textAlign: 'center' },
-  heroStats: { alignItems: 'center', gap: 8, marginBottom: 24 },
+  accountNumber: {
+    fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant,
+    letterSpacing: 1, marginBottom: 10,
+  },
+  balance: {
+    fontSize: 52, fontWeight: '800', color: colors.onSurface,
+    letterSpacing: -2, marginBottom: 16, textAlign: 'center',
+  },
+  heroStats: { alignItems: 'center', gap: 8, marginBottom: 8 },
   gainBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: colors.tertiaryFixed, paddingHorizontal: 10, paddingVertical: 4,
@@ -308,7 +298,6 @@ const styles = StyleSheet.create({
   gainBadgeText: { fontSize: 11, fontWeight: '700', color: colors.onTertiaryFixedVariant },
   gainSub: { fontSize: 13, fontWeight: '500', color: colors.onSurfaceVariant },
 
-  // Cards
   card: {
     backgroundColor: colors.surfaceContainerLowest, borderRadius: 20,
     padding: 24, marginBottom: 16,
@@ -317,7 +306,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 18, fontWeight: '700', color: colors.onSurface, marginBottom: 4 },
   cardSub: { fontSize: 13, color: colors.onSurfaceVariant, marginBottom: 20 },
 
-  // Chart
   chartContainer: { flexDirection: 'row', height: 220, marginBottom: 16 },
   yAxis: { justifyContent: 'space-between', paddingVertical: 8, marginRight: 8, width: 36 },
   axisLabel: { fontSize: 10, fontWeight: '700', color: colors.onSurfaceVariant + '66' },
@@ -338,7 +326,6 @@ const styles = StyleSheet.create({
   riskRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   riskText: { fontSize: 13, fontWeight: '600', color: colors.onSurfaceVariant },
 
-  // Sectors
   sectorList: { gap: 16, marginBottom: 20 },
   sectorRow: { gap: 6 },
   sectorLabelRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -349,7 +336,6 @@ const styles = StyleSheet.create({
   detailLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8 },
   detailLinkText: { fontSize: 13, fontWeight: '700', color: colors.primary },
 
-  // Geo
   geoRow: { flexDirection: 'row', alignItems: 'center', gap: 24, marginTop: 8 },
   donutWrap: { position: 'relative', width: 120, height: 120, alignItems: 'center', justifyContent: 'center' },
   donutCenter: { position: 'absolute', alignItems: 'center' },
@@ -361,7 +347,6 @@ const styles = StyleSheet.create({
   geoLegendName: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
   geoLegendPct: { fontSize: 14, fontWeight: '700', color: colors.onSurface },
 
-  // Activity
   activityHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   viewAll: { fontSize: 13, fontWeight: '700', color: colors.onSurfaceVariant },
   activityItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
