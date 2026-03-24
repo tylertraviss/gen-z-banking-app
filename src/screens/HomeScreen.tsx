@@ -5,10 +5,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 
 const registeredAccounts = [
@@ -18,6 +18,7 @@ const registeredAccounts = [
     balance: '$1,000.00',
     tag: 'Growth Mode',
     tagColor: colors.tertiaryContainer,
+    isTFSA: false,
   },
   {
     type: 'TFSA',
@@ -25,6 +26,7 @@ const registeredAccounts = [
     balance: '$84,290.42',
     tag: 'Stable',
     tagColor: colors.secondary,
+    isTFSA: true,
   },
 ];
 
@@ -59,6 +61,8 @@ const subscriptions = [
 ];
 
 export default function HomeScreen() {
+  const navigation = useNavigation<any>();
+
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
       {/* Header */}
@@ -66,12 +70,6 @@ export default function HomeScreen() {
         <View style={styles.headerLogo}>
           <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
           <Text style={styles.logoText}>SYNERGY</Text>
-        </View>
-        <View style={styles.avatar}>
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAw9ad9KEosGiHg7hMcWj2MObYMQw97LaoThB577kAyffIPgN8zAoqlcS5dKMLMktoUTQ2NFijsWbibnGTLXbVUNL0v0r6Yz7WZDeyfd3Oef7uV8ezAG1nm7vAg5YfuECwdSOT7g0gdWYSuEeldZnzRBl6XHb0DnzLoo0Hvh3Ce6-cy5vOv8NVJxUp6GYIJavC4IZknd9EgGOhSvb83zwKJLhL2S3sfioVppK3E9v-92hSlwqrAy-1NSrUwXw9_gYyCmXCvSeQEMNE' }}
-            style={styles.avatarImg}
-          />
         </View>
       </View>
 
@@ -91,7 +89,12 @@ export default function HomeScreen() {
           </View>
           <View style={styles.accountGrid}>
             {registeredAccounts.map((acct) => (
-              <TouchableOpacity key={acct.number} style={styles.accountCard} activeOpacity={0.8}>
+              <TouchableOpacity
+                key={acct.number}
+                style={styles.accountCard}
+                activeOpacity={0.8}
+                onPress={() => acct.isTFSA && navigation.navigate('Vaults')}
+              >
                 <View>
                   <Text style={styles.accountType}>{acct.type}</Text>
                   <Text style={styles.accountNumber}>{acct.number}</Text>
@@ -102,6 +105,7 @@ export default function HomeScreen() {
                 </View>
               </TouchableOpacity>
             ))}
+            <LinkAccountButton />
           </View>
         </View>
 
@@ -124,11 +128,7 @@ export default function HomeScreen() {
               </View>
             </TouchableOpacity>
 
-            {/* Link Account */}
-            <TouchableOpacity style={styles.linkAccountBtn} activeOpacity={0.8}>
-              <MaterialIcons name="add" size={16} color={colors.secondary} />
-              <Text style={styles.linkAccountText}>Link Account</Text>
-            </TouchableOpacity>
+            <LinkAccountButton />
           </View>
         </View>
 
@@ -168,6 +168,23 @@ export default function HomeScreen() {
   );
 }
 
+function LinkAccountButton() {
+  return (
+    <TouchableOpacity style={styles.linkAccountBtn} activeOpacity={0.75}>
+      <View style={styles.linkAccountInner}>
+        <View style={styles.linkAccountIconWrap}>
+          <MaterialIcons name="add" size={18} color="#fff" />
+        </View>
+        <View>
+          <Text style={styles.linkAccountTitle}>Link Account</Text>
+          <Text style={styles.linkAccountSub}>Connect a bank or brokerage</Text>
+        </View>
+      </View>
+      <MaterialIcons name="chevron-right" size={20} color={colors.primary} />
+    </TouchableOpacity>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.surface },
 
@@ -181,11 +198,6 @@ const styles = StyleSheet.create({
     fontSize: 18, fontWeight: '900', letterSpacing: 2,
     color: colors.primaryContainer,
   },
-  avatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden',
-  },
-  avatarImg: { width: '100%', height: '100%' },
 
   scroll: { paddingHorizontal: 20, paddingBottom: 110 },
 
@@ -227,15 +239,41 @@ const styles = StyleSheet.create({
   accountBalance: { fontSize: 16, fontWeight: '700', color: colors.onSurface },
   accountTag: { fontSize: 10, fontWeight: '600', textTransform: 'uppercase', marginTop: 2 },
 
+  // Link Account
   linkAccountBtn: {
-    backgroundColor: 'transparent',
-    borderRadius: 12, borderWidth: 2, borderStyle: 'dashed',
-    borderColor: colors.outlineVariant,
-    paddingVertical: 24, paddingHorizontal: 16,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    minHeight: 72,
+    backgroundColor: colors.primary + '14',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colors.primary + '33',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  linkAccountText: { fontSize: 14, fontWeight: '500', color: colors.secondary },
+  linkAccountInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  linkAccountIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  linkAccountTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  linkAccountSub: {
+    fontSize: 11,
+    color: colors.onSurfaceVariant,
+    marginTop: 1,
+  },
 
   // Subscriptions
   subSection: {
