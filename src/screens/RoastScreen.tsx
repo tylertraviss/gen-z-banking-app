@@ -8,20 +8,11 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 
-function SynergyHeader() {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 24, paddingVertical: 16 }}>
-      <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
-      <Text style={{ fontSize: 18, fontWeight: '900', letterSpacing: 2, color: colors.primaryContainer }}>SYNERGY</Text>
-    </View>
-  );
-}
 
 type Message = {
   id: string;
@@ -83,26 +74,25 @@ export default function RoastScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <SynergyHeader />
+      {/* iMessage-style contact header */}
+      <View style={styles.chatHeader}>
+        <View style={styles.chatAvatar}>
+          <MaterialIcons name="psychology" size={22} color="#fff" />
+        </View>
+        <View style={styles.chatHeaderInfo}>
+          <Text style={styles.chatHeaderName}>Synergy AI</Text>
+          <View style={styles.chatHeaderStatusRow}>
+            <View style={styles.onlineDot} />
+            <Text style={styles.chatHeaderStatus}>Active now</Text>
+          </View>
+        </View>
+      </View>
+
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={90}
       >
-        {/* Hero Header */}
-        <View style={styles.hero}>
-          <View style={styles.badge}>
-            <MaterialIcons name="psychology" size={14} color={colors.primary} />
-            <Text style={styles.badgeText}>AI ROAST MODE ACTIVE</Text>
-          </View>
-          <Text style={styles.heroTitle}>
-            Finance Coach?{' '}
-            <Text style={[styles.heroTitle, { color: colors.primary, fontStyle: 'italic' }]}>Hardly.</Text>
-          </Text>
-          <Text style={styles.heroSub}>
-            The brutally honest reality check your bank account has been screaming for.
-          </Text>
-        </View>
 
         {/* Messages */}
         <ScrollView
@@ -178,15 +168,23 @@ export default function RoastScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
 
-  hero: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 12, alignItems: 'center' },
-  badge: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: colors.primary + '0D', paddingHorizontal: 14, paddingVertical: 6,
-    borderRadius: 999, marginBottom: 12,
+  chatHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.outlineVariant + '40',
+    backgroundColor: colors.surface,
   },
-  badgeText: { fontSize: 11, fontWeight: '700', color: colors.primary, letterSpacing: 1.5, textTransform: 'uppercase' },
-  heroTitle: { fontSize: 32, fontWeight: '800', color: colors.onBackground, textAlign: 'center', letterSpacing: -1, lineHeight: 36 },
-  heroSub: { fontSize: 14, color: colors.onSurfaceVariant, textAlign: 'center', marginTop: 8, maxWidth: 300, lineHeight: 20 },
+  chatAvatar: {
+    width: 42, height: 42, borderRadius: 21,
+    backgroundColor: colors.primary,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  chatHeaderInfo: { flex: 1 },
+  chatHeaderName: { fontSize: 16, fontWeight: '700', color: colors.onSurface },
+  chatHeaderStatusRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
+  onlineDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4caf50' },
+  chatHeaderStatus: { fontSize: 12, color: colors.onSurfaceVariant },
 
   messages: { flex: 1 },
   messagesContent: { paddingHorizontal: 16, paddingTop: 8 },
