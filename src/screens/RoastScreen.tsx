@@ -14,6 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 
+function SynergyHeader() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 24, paddingVertical: 16 }}>
+      <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
+      <Text style={{ fontSize: 18, fontWeight: '900', letterSpacing: 2, color: colors.primaryContainer }}>SYNERGY</Text>
+    </View>
+  );
+}
+
 type Message = {
   id: string;
   role: 'user' | 'ai';
@@ -74,6 +83,7 @@ export default function RoastScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <SynergyHeader />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

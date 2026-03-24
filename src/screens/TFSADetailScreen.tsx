@@ -13,6 +13,26 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { colors } from '../theme/colors';
 
+function SynergyHeader() {
+  return (
+    <View style={headerStyles.header}>
+      <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
+      <Text style={headerStyles.logoText}>SYNERGY</Text>
+    </View>
+  );
+}
+
+const headerStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 24, paddingVertical: 16,
+  },
+  logoText: {
+    fontSize: 18, fontWeight: '900', letterSpacing: 2,
+    color: colors.primaryContainer,
+  },
+});
+
 const { width } = Dimensions.get('window');
 
 const timeRanges = ['1M', '6M', '1Y', 'ALL'];
@@ -72,6 +92,7 @@ export default function TFSADetailScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <SynergyHeader />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <View style={styles.heroSection}>
@@ -80,7 +101,7 @@ export default function TFSADetailScreen() {
             <Text style={styles.heroLabelText}>TAX-FREE SAVINGS ACCOUNT</Text>
           </View>
           <Text style={styles.balance}>$84,290.42</Text>
-          <View style={styles.heroRow}>
+          <View style={styles.heroStats}>
             <View style={styles.gainBadge}>
               <MaterialIcons name="trending-up" size={12} color={colors.onTertiaryFixedVariant} />
               <Text style={styles.gainBadgeText}>+12.4% THIS YEAR</Text>
@@ -281,14 +302,14 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 100 },
 
   // Hero
-  heroSection: { marginBottom: 24 },
-  heroLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  heroSection: { marginBottom: 24, alignItems: 'center', paddingTop: 8 },
+  heroLabel: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   heroLabelText: {
     fontSize: 11, fontWeight: '700', color: colors.onSurfaceVariant,
     letterSpacing: 1.5, textTransform: 'uppercase',
   },
-  balance: { fontSize: 48, fontWeight: '800', color: colors.onSurface, letterSpacing: -2, marginBottom: 8 },
-  heroRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 },
+  balance: { fontSize: 52, fontWeight: '800', color: colors.onSurface, letterSpacing: -2, marginBottom: 16, textAlign: 'center' },
+  heroStats: { alignItems: 'center', gap: 8, marginBottom: 24 },
   gainBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: colors.tertiaryFixed, paddingHorizontal: 10, paddingVertical: 4,
@@ -296,7 +317,7 @@ const styles = StyleSheet.create({
   },
   gainBadgeText: { fontSize: 11, fontWeight: '700', color: colors.onTertiaryFixedVariant },
   gainSub: { fontSize: 13, fontWeight: '500', color: colors.onSurfaceVariant },
-  heroButtons: { flexDirection: 'row', gap: 12 },
+  heroButtons: { flexDirection: 'row', gap: 12, justifyContent: 'center' },
   btnPrimary: { paddingHorizontal: 28, paddingVertical: 14, borderRadius: 999 },
   btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   btnSecondary: {

@@ -93,7 +93,7 @@ export default function HomeScreen() {
                 key={acct.number}
                 style={styles.accountCard}
                 activeOpacity={0.8}
-                onPress={() => acct.isTFSA && navigation.navigate('Vaults')}
+                onPress={() => acct.isTFSA && navigation.navigate('TFSADetail')}
               >
                 <View>
                   <Text style={styles.accountType}>{acct.type}</Text>

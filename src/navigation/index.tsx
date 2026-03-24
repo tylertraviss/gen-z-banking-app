@@ -57,13 +57,6 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Vaults"
-        component={TFSADetailScreen}
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="account-balance-wallet" label="Vaults" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
         name="Squad"
         component={SquadVaultsScreen}
         options={{
@@ -98,6 +91,7 @@ export default function Navigation() {
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
+        <Stack.Screen name="TFSADetail" component={TFSADetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -13,6 +13,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 
+function SynergyHeader() {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 24, paddingVertical: 16 }}>
+      <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
+      <Text style={{ fontSize: 18, fontWeight: '900', letterSpacing: 2, color: colors.primaryContainer }}>SYNERGY</Text>
+    </View>
+  );
+}
+
 const memberImages = [
   'https://lh3.googleusercontent.com/aida-public/AB6AXuB3LY8PeSYGc1uPzMb_B8bsFH6F3dv_x-vQfXwPBov1Bcq_N-7mORVKiYFUxpKRy30ea7BimHGvnjOEjqbBTt0-fxOcq8DiZ668yV9TlmDlLmyrsuvkYJ0bPVFBF5mFxuYmHjQQ6h_aEGBHcp_hUleBM1G3b_JliPgsKdUuBV9-CWblCEADouhf9G3jY82FK22ea2_6bFOP3eaA4ejP57lQfGGk-1zsNQJFmcrcTJvmhq-IC9-TA722CzGNfNcsHD1C4CvpCjgPyW0',
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDqur-msHKN8QGEWxRluUUNvGD4tDeupuQpW-YCgGDiIWHkGdvsuy6bHf7crgTFV87sCbXz91ZLOrINuPv12Zy0s1Ub8PxZ5D0wmYiiis7bQD6RNjcIoM7153mfrV5hCIMgsUmtsPBVCKI6C-4JdR4ntGqCE0Y7cPwCHaT2StZmlfT5j0ZVK0fV5VMSWwFglMdwUoBa84ZkQcqOLdxXRopR8RbbKTcQHqyf2G6D_KTk5UVNCegzegnLt8th6z8IBY6wG6vPuBLS2bA',
@@ -33,6 +42,7 @@ const rules = [
 export default function SquadVaultsScreen() {
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
+      <SynergyHeader />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Iceland Trip Vault Card */}
         <View style={styles.vaultCard}>
