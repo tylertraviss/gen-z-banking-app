@@ -8,14 +8,17 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Path, Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '../theme/colors';
 
-function SynergyHeader() {
+function SynergyHeader({ onBack }: { onBack: () => void }) {
   return (
     <View style={headerStyles.header}>
+      <TouchableOpacity onPress={onBack} style={headerStyles.backBtn} activeOpacity={0.7}>
+        <MaterialIcons name="arrow-back-ios" size={18} color={colors.primary} />
+      </TouchableOpacity>
       <MaterialIcons name="bubble-chart" size={22} color={colors.primaryContainer} />
       <Text style={headerStyles.logoText}>SYNERGY</Text>
     </View>
@@ -27,6 +30,7 @@ const headerStyles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 24, paddingVertical: 16,
   },
+  backBtn: { marginRight: 4, padding: 4 },
   logoText: {
     fontSize: 18, fontWeight: '900', letterSpacing: 2,
     color: colors.primaryContainer,
@@ -89,10 +93,11 @@ function donutOffset(startPct: number) {
 
 export default function TFSADetailScreen() {
   const [activeRange, setActiveRange] = useState('1Y');
+  const navigation = useNavigation();
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <SynergyHeader />
+      <SynergyHeader onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Hero */}
         <View style={styles.heroSection}>
@@ -107,21 +112,6 @@ export default function TFSADetailScreen() {
               <Text style={styles.gainBadgeText}>+12.4% THIS YEAR</Text>
             </View>
             <Text style={styles.gainSub}>+$9,340.12 total gains</Text>
-          </View>
-          <View style={styles.heroButtons}>
-            <TouchableOpacity activeOpacity={0.85}>
-              <LinearGradient
-                colors={['#451ebb', '#5d3fd3']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.btnPrimary}
-              >
-                <Text style={styles.btnPrimaryText}>Contribute</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.btnSecondary} activeOpacity={0.85}>
-              <Text style={styles.btnSecondaryText}>Withdraw</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -317,14 +307,6 @@ const styles = StyleSheet.create({
   },
   gainBadgeText: { fontSize: 11, fontWeight: '700', color: colors.onTertiaryFixedVariant },
   gainSub: { fontSize: 13, fontWeight: '500', color: colors.onSurfaceVariant },
-  heroButtons: { flexDirection: 'row', gap: 12, justifyContent: 'center' },
-  btnPrimary: { paddingHorizontal: 28, paddingVertical: 14, borderRadius: 999 },
-  btnPrimaryText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  btnSecondary: {
-    paddingHorizontal: 28, paddingVertical: 14, borderRadius: 999,
-    backgroundColor: colors.surfaceContainerHighest,
-  },
-  btnSecondaryText: { color: colors.primary, fontWeight: '700', fontSize: 15 },
 
   // Cards
   card: {

@@ -13,6 +13,19 @@ import SquadVaultsScreen from '../screens/SquadVaultsScreen';
 import RoastScreen from '../screens/RoastScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
+// ─── Home Stack (nested inside Home tab so tab bar stays visible) ──────────────
+
+const HomeStack = createNativeStackNavigator();
+
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <HomeStack.Screen name="HomeMain" component={HomeScreen} />
+      <HomeStack.Screen name="TFSADetail" component={TFSADetailScreen} />
+    </HomeStack.Navigator>
+  );
+}
+
 // ─── Tab Navigator ────────────────────────────────────────────────────────────
 
 const Tab = createBottomTabNavigator();
@@ -51,7 +64,7 @@ function MainTabs() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStackNavigator}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon icon="home" label="Home" focused={focused} />,
         }}
@@ -91,7 +104,6 @@ export default function Navigation() {
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen name="TFSADetail" component={TFSADetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
