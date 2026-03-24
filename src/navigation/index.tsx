@@ -8,7 +8,7 @@ import { colors } from '../theme/colors';
 
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HomeScreen from '../screens/HomeScreen';
-import TFSADetailScreen from '../screens/TFSADetailScreen';
+import AccountDetailScreen from '../screens/AccountDetailScreen';
 import SquadVaultsScreen from '../screens/SquadVaultsScreen';
 import RoastScreen from '../screens/RoastScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -21,7 +21,7 @@ function HomeStackNavigator() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
-      <HomeStack.Screen name="TFSADetail" component={TFSADetailScreen} />
+      <HomeStack.Screen name="AccountDetail" component={AccountDetailScreen} />
     </HomeStack.Navigator>
   );
 }
